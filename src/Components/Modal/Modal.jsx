@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import PropTypes from 'prop-types';
-import { createPortal } from 'react-dom';
+import PropTypes from "prop-types";
+import { createPortal } from "react-dom";
 import { ModaOverlay, ModalWindow } from './Modal.styled';
 
-const modalRoot = document.querySelector('#modal-root');
+const modalRoot = document.querySelector("#modal-root");
 
 function Modal({ onClose, children }) {
 
@@ -14,7 +14,7 @@ function Modal({ onClose, children }) {
     };
   });
 
-const handleKeyDown = evt => {
+  const handleKeyDown = evt => {
     if (evt.code === 'Escape') {
       onClose();
     }

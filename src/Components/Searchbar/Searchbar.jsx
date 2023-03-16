@@ -1,12 +1,7 @@
 import { useState } from "react";
 import PropTypes from 'prop-types';
 import { ReactComponent as MyIcon } from '../icons/search.svg';
-import {
-  Wrapper,
-  SearchForm,
-  SearchFormBtn,
-  SearchInput,
-} from './Searchbar.styled';
+import {Wrapper, SearchForm, SearchFormBtn, SearchInput } from './Searchbar.styled';
 
 function Searchbar ({onSubmit}) {
 

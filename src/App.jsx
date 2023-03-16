@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import fetchImages from './Services/api';
+import fetchImages from "./Services/api";
 import Searchbar from './Components/Searchbar/Searchbar';
-import ImageGallery from './Components/ImageGallery/ImageGallery';
-import LoadMoreButton from './Components/Button/Button';
+import ImageGallery from "./Components/ImageGallery/ImageGallery";
+import LoadMoreButton from "./Components/Button/Button";
 import Modal from './Components/Modal/Modal';
 import Loader from './Components/Loader/Loader';
 
