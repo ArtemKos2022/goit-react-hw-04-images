@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from "react";
 import fetchImages from './Services/api';
 import Searchbar from './Components/Searchbar/Searchbar';
 import ImageGallery from './Components/ImageGallery/ImageGallery';
@@ -6,103 +6,85 @@ import LoadMoreButton from './Components/Button/Button';
 import Modal from './Components/Modal/Modal';
 import Loader from './Components/Loader/Loader';
 
-class App extends Component {
-  state = {
-    searchImages: '',
-    images: [],
-    page: 1,
+function App() {
+  const [searchImages, setSearchImages] = useState("");
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [modalImage, setModalImage] = useState("");
+  const [modalAlt, setModalAlt] = useState("");
 
-    showModal: false,
-    loading: false,
+  useEffect(() => {
 
-    modalImage: '',
-    modalAlt: '',
+    if (searchImages === "") {
+      return;
+    }
+
+    if (page === 1) {
+      setImages([]);
+    }
+    setLoading(true);
+    
+    fetchImages(searchImages, page)
+      .then((res) => {
+        const images = res.data.hits.map(
+          ({ id, tags, webformatURL, largeImageURL }) => {
+            return { id, tags, webformatURL, largeImageURL, };
+          }
+        );
+
+        if (images.length === 0) {
+          alert(`Sorry, nothing found`);
+          setLoading(false);
+          return;
+        }
+
+        setImages((prevImages) => [...prevImages, ...images]);
+        setLoading(false);
+      })
+  }, [searchImages, page]);
+
+  const handleFormSubmit = (searchImages) => {
+    setSearchImages(searchImages);
+    setPage(1);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchImages !== this.state.searchImages) {
-      this.setState({ images: [] });
-      this.fetchPictures();
-    }
+  const onLoadMore = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
 
-    if (prevState.page !== this.state.page && this.state.page !== 1) {
-      this.fetchPictures();
-    }
-  }
+  const toggleModal = () => {
+    setShowModal((showModal) => !showModal);
+  };
+  const setModal = (largeImageURL, tags ) => {
+    setModalImage(largeImageURL);
+    setModalAlt(tags);
+    toggleModal();
+  };
+    
+  return (
+    <div>
+      <Searchbar onSubmit={handleFormSubmit} />
 
-  fetchPictures = () => {
-    const { searchImages, page } = this.state;
+      {images.length > 0 && (
+        <ImageGallery setModal={setModal} images={images} />
+      )}
 
-    this.setState({ loading: true });
-
-    fetchImages(searchImages, page).then(res => {
-      const images = res.data.hits.map(
-        ({ id, tags, webformatURL, largeImageURL }) => {
-          return { id, tags, webformatURL, largeImageURL };
-        }
-      );
-
-      if (images.length === 0) {
-        this.setState({ loading: false });
-        alert(`Sorry, nothing found`);
-        return;
+      {loading ?
+        (<Loader/>) :
+        ( images.length > 0 &&
+          images.length % 12 === 0 &&
+          (<LoadMoreButton onClick={onLoadMore} />)
+        )
       }
 
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images],
-      }));
-      this.setState({ loading: false });
-    });
-  };
-
-  handleFormSubmit = searchImages => {
-    this.setState({ searchImages, page: 1 });
-  };
-
-  onLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
-
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
-  };
-  setModal = (largeImageURL, tags) => {
-    this.setState({ modalImage: largeImageURL });
-    this.setState({ modalAlt: tags });
-    this.toggleModal();
-  };
-
-  render() {
-    const { images, loading, showModal, modalImage, modalAlt } = this.state;
-    const { handleFormSubmit, onLoadMore, toggleModal, setModal } = this;
-
-    return (
-      <div>
-        <Searchbar onSubmit={handleFormSubmit} />
-
-        {images.length > 0 && (
-          <ImageGallery setModal={setModal} images={images} />
-        )}
-
-        {loading ? (
-          // (<p>Загрузка ...</p>) :
-          <Loader />
-        ) : (
-          this.state.images.length > 0 &&
-          this.state.images.length % 12 === 0 && (
-            <LoadMoreButton onClick={onLoadMore} />
-          )
-        )}
-
-        {showModal && (
-          <Modal onClose={toggleModal}>
-            <img src={modalImage} alt={modalAlt} />
-          </Modal>
-        )}
-      </div>
-    );
-  }
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={modalImage} alt={modalAlt} />
+        </Modal>
+      )}
+    </div>
+  );
 }
 export default App;
